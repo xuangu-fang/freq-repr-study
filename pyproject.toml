@@ -1,0 +1,8 @@
+[project]
+name = "freq-repr-study"
+version = "0.1.0"
+description = "Representation study for frequency trajectories of PDE solution families"
+requires-python = ">=3.10"
+
+[tool.setuptools]
+packages = ["src"]
