@@ -1,0 +1,27 @@
+experiment_name: full_grid_medium
+
+seed: 42
+
+dataset:
+  num_trajectories: 30
+  train_ratio: 0.7
+  val_ratio: 0.1
+  test_ratio: 0.2
+
+demos:
+  - configs/demos/phase_family.yaml
+  - configs/demos/screened_poisson.yaml
+
+representations:
+  - raw
+  - fourier
+  - amplitude_phase
+  - pca
+
+metrics:
+  - local_smoothness
+  - curvature
+  - intrinsic_rank
+  - interpolation_error
+
+output_dir: outputs/full_grid_medium
