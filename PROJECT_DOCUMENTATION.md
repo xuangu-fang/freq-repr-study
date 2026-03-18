@@ -128,10 +128,12 @@ outputs/
     - raw: smoothness=11.83±5.08, curvature=0.14±0.06
     - fourier: smoothness=757.1±325, curvature=9.11±4.03
 
-### 阶段5：完整实现
-- 实现所有表示（amplitude_phase, pca）
-- 实现所有度量（intrinsic_rank, interpolation_error）
-- 运行完整基准测试
+### 阶段5：完整实现 ✅
+- 实现所有表示（amplitude_phase, pca）✅
+- 实现所有度量（intrinsic_rank, interpolation_error）✅
+- 为所有度量和表示添加中文文档说明物理意义和优劣 ✅
+- 验证和测试所有模块功能 ✅
+- 运行完整基准测试（待进行）
 
 ### 阶段6：分析和报告
 - 生成比较图表
@@ -225,11 +227,15 @@ context/
 2. **screened_poisson 数据生成** - 已实现，解决配置兼容性问题，测试通过
 3. **raw 和 fourier 表示 + smoothness 和 curvature 度量** - 已实现并集成
 4. **10条轨迹的小型基准测试** - 已成功运行，流水线完全通畅
+5. **amplitude_phase 和 pca 表示** - 已实现并测试通过
+6. **intrinsic_rank 和 interpolation_error 度量** - 已完善实现并添加中文文档
+7. **所有度量和表示的中文文档** - 已添加物理意义和优劣说明（low better/high better）
+8. **Git仓库维护** - 创建.gitignore，及时commit & push，避免大文件
 
 ### 中期任务
-1. 完善所有表示和度量实现
-2. 添加更复杂的插值误差计算
-3. 实现结果可视化和报告生成
+1. 运行完整基准测试（所有表示和度量）
+2. 实现结果可视化和报告生成
+3. 分析不同表示空间的性能比较
 
 ### 长期任务
 1. 扩展到3D场和几何结构
@@ -239,4 +245,4 @@ context/
 ---
 
 *文档更新时间：2026-03-18*
-*项目版本：0.2.0*
+*项目版本：0.3.0*
