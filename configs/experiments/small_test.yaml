@@ -1,0 +1,23 @@
+experiment_name: small_test
+
+seed: 42
+
+dataset:
+  num_trajectories: 10
+  train_ratio: 0.7
+  val_ratio: 0.1
+  test_ratio: 0.2
+
+demos:
+  - configs/demos/phase_family.yaml
+  - configs/demos/screened_poisson.yaml
+
+representations:
+  - raw
+  - fourier
+
+metrics:
+  - local_smoothness
+  - curvature
+
+output_dir: outputs/small_test
