@@ -1,0 +1,27 @@
+experiment_name: high_freq_test
+
+seed: 42
+
+dataset:
+  num_trajectories: 20  # 减少数量，因为分辨率更高，计算量更大
+  train_ratio: 0.7
+  val_ratio: 0.1
+  test_ratio: 0.2
+
+demos:
+  - configs/demos/phase_family_high_freq.yaml
+  - configs/demos/screened_poisson_high_freq.yaml
+
+representations:
+  - raw
+  - fourier
+  - amplitude_phase
+  - pca
+
+metrics:
+  - local_smoothness
+  - curvature
+  - intrinsic_rank
+  - interpolation_error
+
+output_dir: outputs/high_freq_test

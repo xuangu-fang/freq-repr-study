@@ -1,0 +1,18 @@
+name: screened_poisson
+
+resolution: 128  # 提高分辨率以捕捉更精细结构
+num_frequencies: 32
+
+alpha_grid:
+  type: log
+  start: 5.0     # 从原始配置的中高值开始
+  end: 100.0     # 10倍于原始最高值，测试高频屏蔽效应
+
+source:
+  type: gaussian_blobs
+  num_blobs_min: 2
+  num_blobs_max: 5
+  sigma_min: 0.03
+  sigma_max: 0.12
+  amplitude_min: 0.5
+  amplitude_max: 1.5
