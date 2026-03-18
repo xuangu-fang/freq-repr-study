@@ -21,6 +21,12 @@
 - **screened_poisson**: `(Δ - α²) u_α = s(x,y)`
   - 在周期2D域上通过FFT求解
   - 固定源场s(x,y)，在参数α上扫描
+- **helmholtz**: `∇²u + k²u = f(x,y)`
+  - 在周期2D域上通过FFT求解，添加小虚部ε避免共振奇点
+  - 固定源场f(x,y)，在波数k上扫描
+- **wave_equation**: `∂²u/∂t² = c²∇²u + f(x,y)`（频域求解）
+  - 在频域中简化为亥姆霍兹方程：`∇²U + (ω²/c²)U = F(x,y)`
+  - 参数：频率ω，波速c，波数k = ω/c
 
 #### 2. 表示模块
 - **raw**: 原始表示 - 将2D场展平为1D向量
@@ -180,7 +186,9 @@ python -m src.main --config configs/experiments/test_small.yaml
 src/
 ├── data_gen/
 │   ├── phase_family.py          # 相位族数据生成
-│   └── screened_poisson.py      # 屏蔽泊松数据生成
+│   ├── screened_poisson.py      # 屏蔽泊松数据生成
+│   ├── helmholtz.py             # 亥姆霍兹方程数据生成
+│   └── wave_equation.py         # 波动方程数据生成（频域求解）
 ├── representations/
 │   ├── raw_repr.py              # 原始表示
 │   ├── fourier_repr.py          # 傅里叶表示
@@ -201,10 +209,17 @@ src/
 configs/
 ├── experiments/
 │   ├── full_grid_small.yaml     # 小规模全网格实验
-│   └── test_small.yaml          # 小型测试配置
+│   ├── full_grid_medium.yaml    # 中等规模完整实验
+│   ├── high_freq_test.yaml      # 高频实验
+│   ├── helmholtz_test.yaml      # 亥姆霍兹方程实验
+│   └── wave_equation_test.yaml  # 波动方程实验
 └── demos/
     ├── phase_family.yaml        # 相位族配置
-    └── screened_poisson.yaml    # 屏蔽泊松配置
+    ├── phase_family_high_freq.yaml  # 高频相位族配置
+    ├── screened_poisson.yaml    # 屏蔽泊松配置
+    ├── screened_poisson_high_freq.yaml  # 高频屏蔽泊松配置
+    ├── helmholtz.yaml           # 亥姆霍兹方程配置
+    └── wave_equation.yaml       # 波动方程配置
 ```
 
 ### 上下文文档
@@ -280,6 +295,51 @@ context/
 
 详细分析见：`outputs/high_freq_test/analysis.md`
 
+### 亥姆霍兹方程实验
+为扩展研究到更真实的PDE，实现了亥姆霍兹方程：
+
+#### 实现细节
+- **文件**：`src/data_gen/helmholtz.py`
+- **方程**：∇²u + k²u = f(x,y) 在周期2D域上
+- **求解方法**：FFT频域求解，添加小虚部ε避免共振奇点
+- **参数**：波数k（类似频率参数）
+- **源类型**：高斯斑点或平滑随机场
+
+#### 实验设置
+- 配置：`configs/experiments/helmholtz_test.yaml`
+- 轨迹数量：15条，分辨率64×64
+- 波数范围：1.0-20.0（线性）
+
+#### 关键发现
+1. **表示排名完全一致**：PCA > Raw > Amplitude-phase > Fourier 在亥姆霍兹方程上仍然成立
+2. **亥姆霍兹方程特性**：作为线性PDE，产生相对平滑的频率轨迹
+   - raw表示平滑度：1.291（远低于phase_family的20.56）
+3. **跨PDE验证**：表示性能排名在三个不同PDE上完全一致，证明了框架的泛化能力
+
+详细分析见：`outputs/helmholtz_test/analysis.md`
+
+### 波动方程实验
+实现波动方程频域求解，验证与亥姆霍兹方程的数学等价性：
+
+#### 实现细节
+- **文件**：`src/data_gen/wave_equation.py`
+- **方程**：∂²u/∂t² = c²∇²u + f(x,y) 在周期2D域上
+- **求解方法**：频域求解，简化为亥姆霍兹方程 ∇²U + (ω²/c²)U = F(x,y)
+- **参数**：频率ω，波速c，波数k = ω/c
+
+#### 实验设置
+- 配置：`configs/experiments/wave_equation_test.yaml`
+- 轨迹数量：15条，分辨率64×64
+- 频率范围：1.0-20.0（线性），波速c=1.0
+
+#### 重要发现
+1. **数学等价验证**：波动方程（频域）与亥姆霍兹方程等价，实验结果完全一致
+2. **参数映射**：当c=1.0时，频率ω = 波数k，两实验配置相同
+3. **表示排名稳健性**：排名在四个不同PDE上完全一致
+4. **物理扩展价值**：波动方程框架支持波速变化、时域求解等扩展
+
+详细分析见：`outputs/wave_equation_test/analysis.md`
+
 ## 下一步计划
 
 ### ✅ 已完成任务
@@ -293,13 +353,15 @@ context/
 8. **Git仓库维护** - 创建.gitignore，及时commit & push，避免大文件
 9. **完整基准测试运行和结果分析** - 已完成30条轨迹的完整测试，生成详细分析报告
 10. **高频实验验证** - 已验证高频下raw表示平滑度恶化，曲率激增，支持用户的第一性原理直觉
+11. **亥姆霍兹方程实现** - 已实现并测试通过，验证了表示性能排名在真实PDE上的泛化性
+12. **波动方程实现** - 已实现（频域求解），验证了与亥姆霍兹方程的数学等价性
 
 ### 中期任务
-1. **复杂PDE实验** - 更新context文件，实现亥姆霍兹方程和波动方程，验证表示在更真实PDE上的性能
-2. 增加轨迹数量和分辨率验证结论的稳定性
-3. 实现结果可视化（图表生成）
-4. 尝试其他表示（如小波变换、自动编码器）
-5. 基于最优表示构建生成模型进行外推预测
+1. **波动方程波速变化实验** - 测试c ≠ 1.0时的表示性能
+2. **高频亥姆霍兹实验** - 测试更高波数范围（20.0-100.0）下的表示行为
+3. **时域波动方程求解** - 实现有限差分时域求解，研究时域特性
+4. **结果可视化增强** - 生成更多比较图表和可视化
+5. **其他PDE扩展** - 热方程、薛定谔方程等
 
 ### 长期任务
 1. 扩展到3D场和几何结构
@@ -309,4 +371,4 @@ context/
 ---
 
 *文档更新时间：2026-03-18*
-*项目版本：0.5.0*
+*项目版本：0.6.0*

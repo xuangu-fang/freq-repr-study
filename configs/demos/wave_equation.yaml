@@ -1,0 +1,29 @@
+name: wave_equation
+
+resolution: 64
+num_frequencies: 32
+
+# Frequency grid (ω values)
+frequency_grid:
+  type: linear
+  start: 1.0
+  end: 20.0
+
+# Wave speed (c)
+wave_speed: 1.0  # Constant wave speed
+# Alternative: random wave speed per trajectory
+# wave_speed:
+#   type: random
+#   min: 0.5
+#   max: 2.0
+
+epsilon: 0.01  # Small imaginary part to avoid resonance singularity
+
+source:
+  type: gaussian_blobs
+  num_blobs_min: 2
+  num_blobs_max: 5
+  sigma_min: 0.03
+  sigma_max: 0.12
+  amplitude_min: 0.5
+  amplitude_max: 1.5

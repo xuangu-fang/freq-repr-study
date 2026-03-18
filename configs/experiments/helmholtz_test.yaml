@@ -1,0 +1,26 @@
+experiment_name: helmholtz_test
+
+seed: 42
+
+dataset:
+  num_trajectories: 15  # Smaller for quick testing
+  train_ratio: 0.7
+  val_ratio: 0.1
+  test_ratio: 0.2
+
+demos:
+  - configs/demos/helmholtz.yaml
+
+representations:
+  - raw
+  - fourier
+  - amplitude_phase
+  - pca
+
+metrics:
+  - local_smoothness
+  - curvature
+  - intrinsic_rank
+  - interpolation_error
+
+output_dir: outputs/helmholtz_test

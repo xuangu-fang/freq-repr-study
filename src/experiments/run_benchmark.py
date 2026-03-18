@@ -11,6 +11,8 @@ from tqdm import tqdm
 from src.data_gen import (
     generate_phase_family_trajectory,
     generate_screened_poisson_trajectory,
+    generate_helmholtz_trajectory,
+    generate_wave_equation_trajectory,
 )
 from src.representations import (
     RawRepresentation,
@@ -228,6 +230,10 @@ def _generate_trajectory(demo_config):
         return generate_phase_family_trajectory(demo_config)
     elif demo_type == "screened_poisson":
         return generate_screened_poisson_trajectory(demo_config)
+    elif demo_type == "helmholtz":
+        return generate_helmholtz_trajectory(demo_config)
+    elif demo_type == "wave_equation":
+        return generate_wave_equation_trajectory(demo_config)
     else:
         raise ValueError(f"Unknown demo type: {demo_type}")
 
