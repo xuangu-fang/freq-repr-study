@@ -31,6 +31,7 @@ class PCARepresentation:
         self.field_shape = None
         self.pca = None
         self.feature_shape = None
+        self.complex_input = False
 
     def fit(self, train_data, config=None):
         """
@@ -52,9 +53,18 @@ class PCARepresentation:
             return
 
         self.field_shape = train_data[0].shape
+        self.complex_input = np.iscomplexobj(train_data[0])
+
+        # Convert complex fields to real vectors if needed
+        def field_to_real_vector(field):
+            if self.complex_input:
+                # Concatenate real and imaginary parts
+                return np.concatenate([field.real.flatten(), field.imag.flatten()])
+            else:
+                return field.flatten()
 
         # Flatten all training fields into a matrix (n_samples, n_features)
-        X = np.array([field.flatten() for field in train_data])
+        X = np.array([field_to_real_vector(field) for field in train_data])
 
         self.pca = PCA(n_components=self.n_components, whiten=self.whiten)
         self.pca.fit(X)
@@ -83,8 +93,13 @@ class PCARepresentation:
         if self.field_shape is None:
             self.field_shape = trajectory[0].shape
 
-        # Flatten fields
-        X = np.array([field.flatten() for field in trajectory])
+        # Flatten fields (convert complex to real if needed)
+        def field_to_real_vector(field):
+            if self.complex_input:
+                return np.concatenate([field.real.flatten(), field.imag.flatten()])
+            else:
+                return field.flatten()
+        X = np.array([field_to_real_vector(field) for field in trajectory])
         X_transformed = self.pca.transform(X)
         return list(X_transformed)
 
@@ -106,7 +121,19 @@ class PCARepresentation:
             raise RuntimeError("PCA representation not fitted")
 
         X_reconstructed = self.pca.inverse_transform(repr_trajectory)
-        trajectory = [vec.reshape(self.field_shape) for vec in X_reconstructed]
+        trajectory = []
+        for vec in X_reconstructed:
+            if self.complex_input:
+                # Vector contains concatenated real and imaginary parts
+                n = vec.size // 2
+                real_flat = vec[:n]
+                imag_flat = vec[n:]
+                real_part = real_flat.reshape(self.field_shape)
+                imag_part = imag_flat.reshape(self.field_shape)
+                field = real_part + 1j * imag_part
+            else:
+                field = vec.reshape(self.field_shape)
+            trajectory.append(field)
         return trajectory
 
     def metadata(self):

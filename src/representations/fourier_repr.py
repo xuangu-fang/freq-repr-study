@@ -28,6 +28,7 @@ class FourierRepresentation:
         self.field_shape = None
         self.keep_all = self.config.get("keep_all", True)
         self.top_k = self.config.get("top_k", None)
+        self.complex_input = False
 
     def fit(self, train_data, config=None):
         """
@@ -47,6 +48,8 @@ class FourierRepresentation:
 
         if train_data:
             self.field_shape = train_data[0].shape
+            # Detect if input fields are complex
+            self.complex_input = np.iscomplexobj(train_data[0])
 
         # If top_k selection is needed, compute average magnitude spectrum
         # to decide which coefficients to keep.
@@ -85,6 +88,8 @@ class FourierRepresentation:
         """
         if self.field_shape is None:
             self.field_shape = trajectory[0].shape
+            # Detect if input fields are complex
+            self.complex_input = np.iscomplexobj(trajectory[0])
 
         repr_traj = []
         for field in trajectory:
@@ -132,7 +137,10 @@ class FourierRepresentation:
                 fft = np.zeros(self.field_shape, dtype=complex)
                 fft[self.coeff_mask] = vec
 
-            field = np.real(np.fft.ifft2(fft))
+            if self.complex_input:
+                field = np.fft.ifft2(fft)
+            else:
+                field = np.real(np.fft.ifft2(fft))
             trajectory.append(field)
         return trajectory
 

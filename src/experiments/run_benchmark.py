@@ -19,7 +19,11 @@ from src.representations import (
     FourierRepresentation,
     AmplitudePhaseRepresentation,
     PCARepresentation,
+    RealImagRepresentation,
+    AutoencoderRepresentation,
 )
+from src.representations.amplitude_phase_autoencoder_repr import AmplitudePhaseAutoencoderRepresentation
+from src.representations.enhanced_real_imag_autoencoder_repr import EnhancedRealImagAutoencoderRepresentation
 from src.metrics import local_smoothness, mean_curvature, intrinsic_rank, interpolation_error
 
 
@@ -193,15 +197,31 @@ def _init_representations(repr_names, config):
         "raw": RawRepresentation,
         "fourier": FourierRepresentation,
         "amplitude_phase": AmplitudePhaseRepresentation,
+        "amplitude_phase_no_unwrap": AmplitudePhaseRepresentation,
+        "amplitude_phase_unwrap": AmplitudePhaseRepresentation,
         "pca": PCARepresentation,
-        # Add other representations here
+        "real_imag": RealImagRepresentation,
+        "autoencoder": AutoencoderRepresentation,
+        "amplitude_phase_autoencoder": AmplitudePhaseAutoencoderRepresentation,
+        "amplitude_phase_autoencoder_no_unwrap": AmplitudePhaseAutoencoderRepresentation,
+        "enhanced_real_imag_autoencoder": EnhancedRealImagAutoencoderRepresentation,
     }
 
     representations = {}
-    for name in repr_names:
-        if name not in repr_map:
-            raise ValueError(f"Unknown representation: {name}")
-        representations[name] = repr_map[name]()
+    for item in repr_names:
+        if isinstance(item, dict):
+            # Item is a dict with name and optional config
+            repr_name = item["name"]
+            repr_config = item.get("config", {})
+        else:
+            # Item is a string
+            repr_name = item
+            repr_config = {}
+
+        if repr_name not in repr_map:
+            raise ValueError(f"Unknown representation: {repr_name}")
+
+        representations[repr_name] = repr_map[repr_name](repr_config)
     return representations
 
 

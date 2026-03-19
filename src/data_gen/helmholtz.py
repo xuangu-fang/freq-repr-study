@@ -34,6 +34,7 @@ def generate_helmholtz_trajectory(config):
     """
     r = config["resolution"]
     n_k = config["num_frequencies"]
+    return_complex = config.get("return_complex", False)
 
     # Create k grid (wave number)
     if "frequency_grid" in config:
@@ -82,7 +83,10 @@ def generate_helmholtz_trajectory(config):
         denominator = np.where(np.abs(denominator) < 1e-12, 1e-12 + 1j * epsilon, denominator)
 
         u_hat = source_hat / denominator
-        u = np.real(np.fft.ifft2(u_hat))
+        if return_complex:
+            u = np.fft.ifft2(u_hat)
+        else:
+            u = np.real(np.fft.ifft2(u_hat))
         trajectory.append(u)
 
     metadata = {
@@ -209,7 +213,9 @@ def generate_helmholtz_dataset(config, num_trajectories, output_dir=None, seed=4
         raise ValueError(f"Unsupported frequency grid type: {freq_cfg['type']}")
 
     # Initialize arrays
-    trajectories = np.zeros((num_trajectories, n_k, r, r), dtype=np.float32)
+    return_complex = config.get("return_complex", False)
+    dtype = np.complex64 if return_complex else np.float32
+    trajectories = np.zeros((num_trajectories, n_k, r, r), dtype=dtype)
     metadata_list = []
 
     # Generate each trajectory
@@ -287,6 +293,7 @@ def _generate_preview_plots(dataset, output_dir, num_previews=5):
     # Create previews for first num_previews trajectories
     for i in range(num_previews):
         traj = trajectories[i]
+        complex_fields = np.iscomplexobj(traj[0])
 
         # Create figure with 2x3 subplots (show 6 k points)
         fig, axes = plt.subplots(2, 3, figsize=(12, 8))
@@ -304,8 +311,18 @@ def _generate_preview_plots(dataset, output_dir, num_previews=5):
             field = traj[k_idx]
             k_val = wave_numbers[k_idx]
 
-            im = axes[j].imshow(field, cmap='RdBu_r', origin='lower')
-            axes[j].set_title(f"k = {k_val:.2f}")
+            # For complex fields, show amplitude
+            if complex_fields:
+                display_field = np.abs(field)
+                cmap = 'viridis'
+                title_suffix = ' (振幅)'
+            else:
+                display_field = field
+                cmap = 'RdBu_r'
+                title_suffix = ''
+
+            im = axes[j].imshow(display_field, cmap=cmap, origin='lower')
+            axes[j].set_title(f"k = {k_val:.2f}{title_suffix}")
             axes[j].axis('off')
             plt.colorbar(im, ax=axes[j], fraction=0.046, pad=0.04)
 
@@ -326,10 +343,24 @@ def _generate_preview_plots(dataset, output_dir, num_previews=5):
     if num_previews == 1:
         axes = [axes]
 
+    # Detect if fields are complex (check first trajectory)
+    complex_fields = np.iscomplexobj(trajectories[0, 0])
+
     for i in range(num_previews):
         field = trajectories[i, 0]  # First k
-        im = axes[i].imshow(field, cmap='RdBu_r', origin='lower')
-        axes[i].set_title(f"Traj {i+1}, k={wave_numbers[0]:.2f}")
+
+        # For complex fields, show amplitude
+        if complex_fields:
+            display_field = np.abs(field)
+            cmap = 'viridis'
+            title_suffix = ' (振幅)'
+        else:
+            display_field = field
+            cmap = 'RdBu_r'
+            title_suffix = ''
+
+        im = axes[i].imshow(display_field, cmap=cmap, origin='lower')
+        axes[i].set_title(f"Traj {i+1}, k={wave_numbers[0]:.2f}{title_suffix}")
         axes[i].axis('off')
         plt.colorbar(im, ax=axes[i], fraction=0.046, pad=0.04)
 

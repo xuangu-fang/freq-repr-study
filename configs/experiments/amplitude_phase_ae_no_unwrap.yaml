@@ -1,0 +1,73 @@
+# Comprehensive comparison of different autoencoder architectures and input representations
+# 不同自编码器架构和输入表示的全面比较
+
+name: amplitude_phase_ae_no_unwrap
+
+dataset:
+  num_trajectories: 20
+  train_ratio: 0.6
+  val_ratio: 0.2
+  test_ratio: 0.2
+  seed: 42
+
+demos:
+  - configs/demos/helmholtz_low_freq.yaml  # Use complex field Helmholtz
+
+representations:
+  # ===== Learning-based representations (autoencoders) =====
+
+  # Amplitude-phase autoencoder without phase unwrapping (main test)
+  - name: amplitude_phase_autoencoder_no_unwrap
+    config:
+      latent_dim: 32
+      phase_unwrap: false
+      learning_rate: 1e-3
+      num_epochs: 20
+      batch_size: 8
+      device: cpu
+
+  # Amplitude-phase autoencoder with phase unwrapping (for comparison)
+  - name: amplitude_phase_autoencoder
+    config:
+      latent_dim: 32
+      phase_unwrap: true
+      learning_rate: 1e-3
+      num_epochs: 20
+      batch_size: 8
+      device: cpu
+
+  # Original autoencoder (baseline - real-imag input, best performer)
+  - name: autoencoder
+    config:
+      latent_dim: 32
+      learning_rate: 1e-3
+      num_epochs: 20
+      batch_size: 8
+      device: cpu
+
+  # ===== Traditional representations (for comparison) =====
+
+  # Traditional amplitude-phase without unwrapping
+  - name: amplitude_phase_no_unwrap
+    config:
+      use_hilbert: true
+      separate_channels: true
+      phase_unwrap: false
+
+  # Traditional amplitude-phase with unwrapping
+  - name: amplitude_phase_unwrap
+    config:
+      use_hilbert: true
+      separate_channels: true
+      phase_unwrap: true
+
+  # PCA (strong linear baseline)
+  - pca
+
+metrics:
+  - local_smoothness
+  - curvature
+  - intrinsic_rank
+  - interpolation_error
+
+output_dir: outputs/amplitude_phase_ae_no_unwrap

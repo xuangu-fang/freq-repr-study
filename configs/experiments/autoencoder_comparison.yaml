@@ -1,0 +1,83 @@
+# Comprehensive comparison of different autoencoder architectures and input representations
+# 不同自编码器架构和输入表示的全面比较
+
+name: autoencoder_comparison
+
+dataset:
+  num_trajectories: 20
+  train_ratio: 0.6
+  val_ratio: 0.2
+  test_ratio: 0.2
+  seed: 42
+
+demos:
+  - configs/demos/helmholtz_low_freq.yaml  # Use complex field Helmholtz
+
+representations:
+  # ===== Baseline representations (traditional methods) =====
+  - raw
+  - fourier
+
+  # Amplitude-phase variants
+  - name: amplitude_phase_no_unwrap
+    config:
+      use_hilbert: true
+      separate_channels: true
+      phase_unwrap: false
+
+  - name: amplitude_phase_unwrap
+    config:
+      use_hilbert: true
+      separate_channels: true
+      phase_unwrap: true
+
+  - real_imag
+  - pca
+
+  # ===== Learning-based representations (autoencoders) =====
+
+  # Original autoencoder (baseline - real-imag input)
+  - name: autoencoder
+    config:
+      latent_dim: 32
+      learning_rate: 1e-3
+      num_epochs: 20  # Reduced for faster comparison
+      batch_size: 8
+      device: cpu
+
+  # Amplitude-phase autoencoder (new variant)
+  - name: amplitude_phase_autoencoder
+    config:
+      latent_dim: 32
+      phase_unwrap: true
+      learning_rate: 1e-3
+      num_epochs: 20
+      batch_size: 8
+      device: cpu
+
+  # Amplitude-phase autoencoder without phase unwrapping (for comparison)
+  - name: amplitude_phase_autoencoder_no_unwrap
+    config:
+      latent_dim: 32
+      phase_unwrap: false
+      learning_rate: 1e-3
+      num_epochs: 20
+      batch_size: 8
+      device: cpu
+
+  # Enhanced real-imag autoencoder (deeper architecture)
+  - name: enhanced_real_imag_autoencoder
+    config:
+      latent_dim: 32
+      learning_rate: 1e-3
+      num_epochs: 20
+      batch_size: 8
+      device: cpu
+
+metrics:
+  - local_smoothness
+  - curvature
+  - intrinsic_rank
+  - interpolation_error
+
+output_dir: outputs/autoencoder_comparison

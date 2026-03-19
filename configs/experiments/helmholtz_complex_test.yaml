@@ -1,0 +1,26 @@
+# Test experiment for Helmholtz complex field generation
+name: helmholtz_complex_test
+
+dataset:
+  num_trajectories: 5
+  train_ratio: 0.6
+  val_ratio: 0.2
+  test_ratio: 0.2
+  seed: 42
+
+demos:
+  - configs/demos/helmholtz_low_freq.yaml
+
+representations:
+  - raw
+  - fourier
+  - amplitude_phase
+  - pca
+
+metrics:
+  - local_smoothness
+  - curvature
+  - intrinsic_rank
+  - interpolation_error
+
+output_dir: outputs/helmholtz_complex_test

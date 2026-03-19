@@ -1,0 +1,54 @@
+# Comprehensive analysis of complex field representations for Helmholtz equation
+# Compares amplitude-phase (with/without unwrapping) vs real-imag representations
+# Version 2: distinct names for amplitude_phase variants
+name: helmholtz_complex_analysis_v2
+
+dataset:
+  num_trajectories: 20
+  train_ratio: 0.6
+  val_ratio: 0.2
+  test_ratio: 0.2
+  seed: 42
+
+demos:
+  - configs/demos/helmholtz_low_freq.yaml
+
+representations:
+  # Baseline representations
+  - raw
+  - fourier
+
+  # Complex field specific representations
+  - name: amplitude_phase_no_unwrap
+    config:
+      use_hilbert: true
+      separate_channels: true
+      phase_unwrap: false
+
+  - name: amplitude_phase_unwrap
+    config:
+      use_hilbert: true
+      separate_channels: true
+      phase_unwrap: true
+
+  - name: real_imag
+
+  # PCA (will learn from training data)
+  - pca
+
+  # Learning-based representation
+  - name: autoencoder
+    config:
+      latent_dim: 32
+      learning_rate: 1e-3
+      num_epochs: 20  # Reduced for testing
+      batch_size: 8
+      device: cpu
+
+metrics:
+  - local_smoothness
+  - curvature
+  - intrinsic_rank
+  - interpolation_error
+
+output_dir: outputs/helmholtz_complex_analysis_v2

@@ -1,0 +1,24 @@
+name: helmholtz
+
+resolution: 64
+num_frequencies: 32
+
+# Low frequency wave numbers for visible variation
+wave_number_grid:
+  type: linear
+  start: 0.5
+  end: 5.0
+
+epsilon: 0.01  # Small imaginary part to avoid resonance singularity
+
+# Optional: return complex fields (True) or real part only (False)
+return_complex: true
+
+source:
+  type: gaussian_blobs
+  num_blobs_min: 2
+  num_blobs_max: 5
+  sigma_min: 0.03
+  sigma_max: 0.12
+  amplitude_min: 0.5
+  amplitude_max: 1.5
